@@ -5,7 +5,8 @@ import pygame
 
 
 class TelloFlightPathFollower:
-    def __init__(self, tello=None, flight_path=None, default_speed=10, debug=False):
+    def __init__(self, tello=None, flight_path=None, default_speed=10,
+                 debug=False):
         # Store the incoming parameters to the class isntance variables
         self.debug = debug
         self.default_speed = default_speed
@@ -97,7 +98,8 @@ class TelloFlightPathFollower:
                     if event.key == pygame.K_ESCAPE:
                         if self.tello.is_flying:
                             if self.debug:
-                                print('WARNING: Escaping while flying results in a crash')
+                                print('WARNING: Escaping while flying'
+                                      ' results in a crash')
                                 print('WARNING: Initiating auto land first!')
                             self._land()
                         should_stop = True
@@ -138,13 +140,17 @@ class TelloFlightPathFollower:
         Arguments:
             key: pygame key
         """
-        if key == pygame.K_UP or key == pygame.K_DOWN:  # set zero forward/backward velocity
+        if key == pygame.K_UP or key == pygame.K_DOWN:
+            # set zero forward/backward velocity
             self.for_back_velocity = 0
-        elif key == pygame.K_LEFT or key == pygame.K_RIGHT:  # set zero left/right velocity
+        elif key == pygame.K_LEFT or key == pygame.K_RIGHT:
+            # set zero left/right velocity
             self.left_right_velocity = 0
-        elif key == pygame.K_w or key == pygame.K_s:  # set zero up/down velocity
+        elif key == pygame.K_w or key == pygame.K_s:
+            # set zero up/down velocity
             self.up_down_velocity = 0
-        elif key == pygame.K_a or key == pygame.K_d:  # set zero yaw velocity
+        elif key == pygame.K_a or key == pygame.K_d:
+            # set zero yaw velocity
             self.yaw_velocity = 0
         elif key == pygame.K_t:  # takeoff
             self.tello.takeoff()
@@ -158,12 +164,12 @@ class TelloFlightPathFollower:
         """
         if self.send_rc_control:
             """
-            self.tello.send_rc_control(self.left_right_velocity, self.for_back_velocity,
-                self.up_down_velocity, self.yaw_velocity)
+            self.tello.send_rc_control(self.left_right_velocity,
+                self.for_back_velocity, self.up_down_velocity,
+                self.yaw_velocity)
             """
-            print(f'{self.left_right_velocity}, {self.for_back_velocity},' \
-                f'{self.up_down_velocity}, {self.yaw_velocity}')
-
+            print(f'{self.left_right_velocity}, {self.for_back_velocity},'
+                  f'{self.up_down_velocity}, {self.yaw_velocity}')
 
     def set_flight_path(self, flight_path):
         if self.debug:
@@ -187,7 +193,7 @@ class TelloFlightPathFollower:
         if self.debug:
             print(f'moving up by {x}')
         self.tello.move_up(x)
-    
+
     def _move_down(self, x):
         if self.debug:
             print(f'moving down by {x}')
@@ -219,16 +225,16 @@ class TelloFlightPathFollower:
 
     #
     # Rotation helpers
-    # 
+    #
     def _rotate_clockwise(self, turn=0):
         if self.debug:
             print(f'rotate clockwise {turn} degrees')
-        self.tello.rotate_clockwise(turn)        
+        self.tello.rotate_clockwise(turn)
 
     def _rotate_counter_clockwise(self, turn=0):
         if self.debug:
             print(f'rotate counter clockwise {turn} degrees')
-        self.tello.rotate_counter_clockwise(turn)        
+        self.tello.rotate_counter_clockwise(turn)
 
     #
     # A function that tries to find a mission pad by moving forward each
@@ -239,22 +245,24 @@ class TelloFlightPathFollower:
         """Finds a mission pad.  This method is passed an ID to the pad being
         looked for, as well as the distance to move. This method takes a
         reference to a "movement function" that is called if the pad is not
-        detected.  This pad also takes an optional parameter to limit the number
-        of times it iterates looking for the ID.
+        detected.  This pad also takes an optional parameter to limit the
+        number of times it iterates looking for the ID.
 
         Args:
-            direction_func (function): A function describing movement. Required.
-            creep (int): Distance (in cm) moved. Required.
-            expected_padid (int): Pad ID to look for. Required.
-            delay_between (float, optional): Optional delay time between iterations. Defaults to None.
-            iteration_limit (int, optional): Optional limit on the number of iterations performed. Defaults to None.
+            direction_func (function): A function describing movement. Req.
+            creep (int): Distance (in cm) moved. Req.
+            expected_padid (int): Pad ID to look for. Req.
+            delay_between (float, optional): Optional delay time between
+                iterations. Defaults to None.
+            iteration_limit (int, optional): Optional limit on the number
+                of iterations performed. Defaults to None.
         """
         if self.debug:
             print(f'finding {expected_padid}')
         if not iteration_limit:
-            iteration_limit = 1000 # should be longer than flight time
+            iteration_limit = 1000  # should be longer than flight time
         while iteration_limit != 0 and \
-              self.tello.get_mission_pad_id() != expected_padid:
+                self.tello.get_mission_pad_id() != expected_padid:
             if self.debug:
                 print(f'..iteration {iteration_limit} moving {creep} cm')
             direction_func(creep)
@@ -323,10 +331,8 @@ class TelloFlightPathFollower:
             elif direction == 'back':
                 self._move_back(value)
 
-        # 'cmd': 'find', 'direction': 'forward', 'distance': value, 'padid': value
-        # 'cmd': 'find', 'direction': 'back', 'distance': value, 'padid': value
-        # 'cmd': 'find', 'direction': 'left', 'distance': value, 'padid': value
-        # 'cmd': 'find', 'direction': 'right', 'distance': value, 'padid': value
+        # 'cmd': 'find', 'direction': dir, 'distance': value, 'padid': value
+        # where the direction is one of 'forward', 'back', 'left', and 'right'
         elif step_dict['cmd'] == 'find':
             direction = step_dict['direction']
             distance = step_dict['value']
@@ -346,7 +352,8 @@ class TelloFlightPathFollower:
             elif direction == 'right':
                 dir_func = self._move_right
             self._find_mission_pad(direction_func=dir_func, creep=distance,
-                                   expected_padid=padid, delay_between=delay_between,
+                                   expected_padid=padid,
+                                   delay_between=delay_between,
                                    iteration_limit=iteration_limit)
 
         # 'cmd': 'manual'
@@ -361,18 +368,16 @@ class TelloFlightPathFollower:
 
         if 'delay_after' in step_dict:
             # 'delay_after': delay_value is a common parameter to all dict
-            # entries.  If specified, the delay_value is used as a delay, otherwise
-            # the delay is skipped.
+            # entries.  If specified, the delay_value is used as a delay,
+            # otherwise the delay is skipped.
             delay_value = step_dict['delay_after']
             time.sleep(delay_value)
-        
 
         if self.step_speed_override:
-            # if the speed was overridden during this step, restore it for the 
+            # if the speed was overridden during this step, restore it for the
             # next step
             self.tello.set_speed(self.default_speed)
             self.step_speed_override = False
-
 
     def run(self):
         # first, execute any AUTO path sequences
